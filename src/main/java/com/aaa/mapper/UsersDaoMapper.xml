@@ -1,0 +1,12 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.UsersDao">
+    <resultMap id="userMap" type="com.aaa.entity.Users" autoMapping="true">
+
+    </resultMap>
+
+    <select id="querypwd" resultMap="userMap">
+        SELECT u.id,u.name,u.pwd FROM users u WHERE u.name = #{name} AND pwd = #{pwd}
+    </select>
+</mapper>

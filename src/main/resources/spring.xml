@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- 扫描service -->
+    <context:component-scan base-package="com.aaa.service"></context:component-scan>
+    <context:annotation-config></context:annotation-config>
+
+    <!-- 数据库配置 -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- c3p0：开源JDBC连接池，数据源和JDNI绑定，自动回收空闲链接 -->
+    <!-- dbcp：DBCP数据库连接池，是java数据库连接池，没有自动回收空闲链接的功能，效率高 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="jdbcUrl" value="${oracle.url}"></property>
+        <property name="driverClass" value="${oracle.driver}"></property>
+        <property name="user" value="${oracle.name}"></property>
+        <property name="password" value="${oracle.password}"></property>
+    </bean>
+
+    <!-- mybatis配置 -->
+    <!-- springmybatis配置 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="mapperLocations" value="classpath*:com/aaa/mapper/*.xml"></property>
+        <!-- 包别名配置  resultType="com.aaa.entity.Emp"-->
+        <property name="typeAliasesPackage" value="com.aaa.entity"></property>
+        <!--指定mybatis的主配置文件-->
+        <property name="configLocation" value="classpath:mybatis.xml"></property>
+        <!--分页插件-->
+        <property name="plugins">
+            <bean class="com.github.pagehelper.PageInterceptor">
+                <property name="properties">
+                    <value>
+                        <!-- 数据库 -->
+                        heplerDialect=oracle
+                    </value>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- 通用mapper 4.1.5配置-->
+    <bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+        <property name="basePackage" value="com.aaa.dao"></property>
+        <property name="properties">
+            <value>
+                mappers=tk.mybatis.mapper.common.Mapper
+            </value>
+        </property>
+    </bean>
+
+    <!--<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">-->
+        <!--<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>-->
+        <!--<property name="basePackage" value="com.aaa.dao"></property>-->
+
+    <!--</bean>-->
+
+    <!-- 事务配置 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!-- 配置注解式事务 -->
+    <tx:annotation-driven proxy-target-class="true"></tx:annotation-driven>
+</beans>

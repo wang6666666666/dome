@@ -1,0 +1,54 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.EmpDao">
+
+    <resultMap id="empMap" type="com.aaa.entity.Emp" autoMapping="true">
+
+    </resultMap>
+
+    <select id="querys" resultMap="empMap">
+        select empno as id,ename,job,mgr,hiredate,sal,comm,deptno from emp
+        <where>
+            <if test="ename!=null">
+                and ename like '%${ename}%'
+            </if>
+        </where>
+    </select>
+
+    <insert id="add">
+        <!--使用序列，添加时自动添加序列-->
+        <selectKey keyProperty="id" resultType="java.lang.Integer" order="BEFORE">
+            select seq_emp.nextval from dual
+        </selectKey>
+        --         添加时使用data可以使用，修改时date不能用
+        insert into emp values(#{id},#{ename},#{job},#{mgr},to_date(#{hiredate,jdbcType=TIMESTAMP},'yyyy-mm-dd hh24:mi:ss'),#{sal},#{comm},#{deptno})
+    </insert>
+
+    <delete id="delete">
+        delete from emp where empno=#{empno}
+    </delete>
+
+    <update id="update">
+        update emp
+        set ename=#{ename},
+            job=#{job},
+            mgr=#{mgr},
+            hiredate=to_date(#{hiredate,jdbcType=TIMESTAMP},'yyyy-mm-dd hh24:mi:ss'),
+            sal=#{sal},
+            comm=#{comm},
+            deptno=#{deptno}
+        where empno=#{id}
+    </update>
+
+    <select id="queryid" resultMap="empMap">
+        select * from emp where empno=#{empno}
+    </select>
+
+    <delete id="dels">
+        delete from emp
+        <foreach collection="array" index="index" item="empno" open="where empno in (" close=")" separator=",">
+            #{empno}
+        </foreach>
+    </delete>
+</mapper>
